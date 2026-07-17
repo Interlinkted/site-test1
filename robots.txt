@@ -1,0 +1,6 @@
+# Семейский ССЗ — правила для поисковых роботов
+# ⚠ Замените домен sssz.kz на реальный адрес сайта.
+User-agent: *
+Allow: /
+
+Sitemap: https://sssz.kz/sitemap.xml
