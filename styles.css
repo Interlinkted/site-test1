@@ -1,0 +1,1181 @@
+/* =========================================================
+   СЕМЕЙСКИЙ ССЗ — СТИЛИ
+   Структура файла:
+   1. Токены (цвета, шрифты, тени, радиусы)
+   2. Сброс / базовые стили
+   3. Утилиты и контейнер
+   4. Шапка и навигация
+   5. Герой-блок и заводская табличка (badge)
+   6. Волны-разделители
+   7. Секция «О нас» + таймлайн
+   8. Секция «Услуги»
+   9. Секция «Контакты»
+   10. Секция «Связь с нами» (форма)
+   11. Футер
+   12. Кнопки и ripple-эффект
+   13. Анимации при скролле
+   14. Адаптив
+   ========================================================= */
+
+/* ---------- 1. ТОКЕНЫ ---------- */
+:root {
+  /* Цвета — вода судостроительного завода: глубина, сталь, ржавчина, пена */
+  --color-abyss:   #112730;  /* глубокая вода — основной тёмный фон */
+  --color-harbor:  #1B3A43;  /* причал — вторичный тёмный фон */
+  --color-steel:   #3D6B74;  /* сталь / бирюза — бренд-акцент */
+  --color-current: #8FBCC2;  /* течение — светлый акцент, hover-состояния */
+  --color-rust:    #B26A43;  /* ржавчина / патина — единственный тёплый CTA-акцент */
+  --color-rust-dark:#97562F;
+  --color-foam:    #F4F6F4;  /* пена — светлый фон */
+  --color-foam-dim:#DFE6E4;
+  --color-rivet:   #86959A;  /* металл / заклёпки — нейтральный серый */
+  --color-ink:     #15272D;  /* текст на светлом фоне */
+
+  /* Типографика */
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-body: 'PT Sans', Arial, sans-serif;
+
+  --fs-hero:  clamp(2.1rem, 1.2rem + 4vw, 3.9rem);
+  --fs-h2:    clamp(1.7rem, 1.1rem + 2.2vw, 2.6rem);
+  --fs-h3:    1.3rem;
+  --fs-body:  1.05rem;
+  --fs-small: 0.9rem;
+
+  /* Прочее */
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --shadow-soft: 0 10px 30px rgba(17, 39, 48, 0.14);
+  --shadow-strong: 0 18px 45px rgba(17, 39, 48, 0.26);
+  --container-width: 1180px;
+  --header-height: 84px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- 2. СБРОС / БАЗА ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  color: var(--color-ink);
+  background: var(--color-foam);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  margin: 0 0 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+h1 { font-size: var(--fs-hero); font-weight: 700; }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+p { margin: 0 0 1em; }
+ul { margin: 0; padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+
+:focus-visible {
+  outline: 3px solid var(--color-current);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 3. УТИЛИТЫ ---------- */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.section { position: relative; padding: 110px 0 0; scroll-margin-top: var(--header-height); }
+.section-light { background: var(--color-foam); color: var(--color-ink); }
+.section-dark  { background: var(--color-harbor); color: var(--color-foam); }
+.section .container { padding-bottom: 100px; }
+
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-current);
+  margin-bottom: 14px;
+}
+.eyebrow-dark { color: var(--color-steel); }
+
+.on-dark { color: var(--color-foam); }
+
+.placeholder-note {
+  font-size: 0.85rem;
+  color: var(--color-rivet);
+  margin-top: 18px;
+}
+
+/* ---------- 4. ШАПКА ---------- */
+.site-header {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  opacity: 0;
+  transform: translateY(-18px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease),
+    background-color 0.35s var(--ease), box-shadow 0.35s var(--ease), height 0.3s var(--ease);
+}
+
+.site-header.is-scrolled {
+  background: rgba(17, 39, 48, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+  height: 68px;
+}
+
+/* Постоянный тёмный фон шапки для страниц без тёмного hero
+   (судоремонт, проектирование) — иначе светлые пункты меню невидимы на светлой секции */
+.site-header--solid {
+  background: rgba(17, 39, 48, 0.97);
+  box-shadow: var(--shadow-soft);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-foam);
+}
+.brand-mark { width: 34px; height: 34px; color: var(--color-current); flex-shrink: 0; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+}
+.brand-sub {
+  display: none;
+  font-size: 0.72rem;
+  color: var(--color-rivet);
+  max-width: 260px;
+}
+/* Подпись бренда показываем только когда 6 вкладок и полное название помещаются в один ряд */
+@media (min-width: 1200px) {
+  .brand-sub { display: block; }
+}
+
+.main-nav ul {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.main-nav a {
+  position: relative;
+  display: inline-block;
+  padding: 10px 16px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-foam);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 7px;
+  height: 7px;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='8' viewBox='0 0 24 8'%3E%3Cpath d='M0 4 Q6 0 12 4 T24 4' fill='none' stroke='%238FBCC2' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 24px 8px;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform 0.4s var(--ease), opacity 0.3s var(--ease);
+}
+.main-nav a:hover { background: rgba(244, 246, 244, 0.1); color: var(--color-current); }
+.main-nav a:hover::after {
+  transform: scaleX(1);
+  opacity: 1;
+  animation: nav-wave-flow 0.9s linear infinite;
+}
+@keyframes nav-wave-flow {
+  from { background-position-x: 0; }
+  to { background-position-x: 24px; }
+}
+.main-nav a.nav-cta {
+  background: var(--color-rust);
+  color: #fff;
+}
+.main-nav a.nav-cta::after { display: none; }
+.main-nav a.nav-cta:hover { background: var(--color-rust-dark); color: #fff; }
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  background: var(--color-foam);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+.nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ---------- 5. ГЕРОЙ + ТАБЛИЧКА ---------- */
+.hero {
+  position: relative;
+  padding-top: var(--header-height);
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-abyss) 0%, var(--color-harbor) 65%, var(--color-steel) 130%);
+  color: var(--color-foam);
+}
+
+.hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+
+/* Фоновое видео героя: перекрывает объём, оверлей сохраняет читаемость текста.
+   Порядок слоёв в .hero-bg по DOM: видео → оверлей → свечение. */
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* лёгкая десатурация — видео не спорит с минималистичной палитрой */
+  filter: saturate(0.85) contrast(1.02);
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg,
+      rgba(17, 39, 48, 0.78) 0%,
+      rgba(27, 58, 67, 0.60) 55%,
+      rgba(17, 39, 48, 0.82) 100%);
+}
+/* Меньше движения — прячем видео, остаётся постер/градиент */
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { display: none; }
+}
+
+.hero-glow {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  right: -280px;
+  top: -220px;
+  background: radial-gradient(circle, rgba(143, 188, 194, 0.14) 0%, rgba(143, 188, 194, 0) 70%);
+  animation: glow-drift 12s ease-in-out infinite alternate;
+}
+@keyframes glow-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-40px, 30px) scale(1.08); }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr;
+  align-items: center;
+  gap: 48px;
+  padding-block: 60px 90px;
+}
+
+.hero-text .eyebrow { color: var(--color-current); }
+.hero h1 { max-width: 14ch; }
+.hero-lead {
+  max-width: 52ch;
+  font-size: 1.1rem;
+  color: var(--color-foam-dim);
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 30px; }
+
+.hero-badge { display: flex; justify-content: center; }
+.badge-svg { width: min(260px, 100%); overflow: visible; }
+.badge-ring-outer { fill: none; stroke: var(--color-current); stroke-width: 1.5; opacity: 0.55; }
+.badge-ring-inner { fill: rgba(61, 107, 116, 0.35); stroke: var(--color-rivet); stroke-width: 1; stroke-dasharray: 4 5; }
+.badge-rivets circle { fill: var(--color-rivet); }
+.badge-year {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+  fill: var(--color-foam);
+}
+.badge-caption {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  fill: var(--color-rivet);
+}
+.badge-years {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  fill: var(--color-rust);
+}
+.hero-badge { animation: badge-float 6s ease-in-out infinite; }
+@keyframes badge-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ---------- 5b. АНИМАЦИЯ ОТКРЫТИЯ САЙТА ----------
+   Шапка и содержимое героя появляются каскадом сразу после загрузки
+   страницы: класс .page-ready ставится через JS (main.js, п.0).
+   Плавающая анимация значка (badge-float) трогает transform у
+   .hero-badge, поэтому вход для бейджа сделан через дочерний
+   .badge-svg — так две анимации transform не конфликтуют. */
+.hero-text .eyebrow,
+.hero-text h1,
+.hero-lead,
+.hero-actions {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.hero-badge { opacity: 0; transition: opacity 0.8s var(--ease); }
+.badge-svg { transform: translateY(16px) scale(0.92); transition: transform 0.8s var(--ease); }
+.hero .wave-divider { opacity: 0; transform: translateY(20px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+
+body.page-ready .hero-text .eyebrow { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
+body.page-ready .hero-text h1 { opacity: 1; transform: translateY(0); transition-delay: 0.28s; }
+body.page-ready .hero-lead { opacity: 1; transform: translateY(0); transition-delay: 0.42s; }
+body.page-ready .hero-actions { opacity: 1; transform: translateY(0); transition-delay: 0.56s; }
+body.page-ready .hero-badge { opacity: 1; transition-delay: 0.45s; }
+body.page-ready .badge-svg { transform: translateY(0) scale(1); transition-delay: 0.45s; }
+body.page-ready .hero .wave-divider { opacity: 1; transform: translateY(0); transition-delay: 0.7s; }
+body.page-ready .site-header { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .hero-text .eyebrow,
+  .hero-text h1,
+  .hero-lead,
+  .hero-actions,
+  .hero-badge,
+  .badge-svg,
+  .hero .wave-divider {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- 6. ВОЛНЫ-РАЗДЕЛИТЕЛИ ----------
+   Волна — это повторяющийся (repeat-x) SVG-тайл шириной 720px,
+   который бесконечно едет по горизонтали через background-position.
+   Т.к. фон именно ЗАЦИКЛЕН (tile), а не сдвигается конечным блоком,
+   анимация никогда не «обрывается» и не даёт видимого шва —
+   каждый цикл в 720px абсолютно идентичен предыдущему. */
+.wave-divider {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 90px;
+  overflow: hidden;
+}
+.hero .wave-divider { position: absolute; left: 0; right: 0; bottom: -2px; height: 110px; }
+
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 720px 100%;
+  will-change: background-position;
+}
+
+.wave-layer-front {
+  animation: wave-scroll-forward 16s linear infinite;
+}
+.wave-layer-back {
+  opacity: 0.45;
+  transform: scaleY(0.8) translateY(6px);
+  animation: wave-scroll-backward 26s linear infinite;
+}
+
+/* Двигаем ровно на одну ширину тайла (720px) — переход от последнего
+   кадра к первому визуально неотличим от середины анимации. */
+@keyframes wave-scroll-forward {
+  from { background-position-x: 0; }
+  to   { background-position-x: -720px; }
+}
+@keyframes wave-scroll-backward {
+  from { background-position-x: 0; }
+  to   { background-position-x: 720px; }
+}
+
+.wave-to-foam .wave-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 90'%3E%3Cpath d='M0,45 C180,90 180,0 360,45 C540,90 540,0 720,45 L720,90 L0,90 Z' fill='%23F4F6F4'/%3E%3C/svg%3E");
+}
+.wave-to-harbor .wave-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 90'%3E%3Cpath d='M0,45 C180,90 180,0 360,45 C540,90 540,0 720,45 L720,90 L0,90 Z' fill='%231B3A43'/%3E%3C/svg%3E");
+}
+.wave-to-abyss .wave-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 90'%3E%3Cpath d='M0,45 C180,90 180,0 360,45 C540,90 540,0 720,45 L720,90 L0,90 Z' fill='%23112730'/%3E%3C/svg%3E");
+}
+
+/* ---------- 7. О НАС ---------- */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 60px;
+  align-items: start;
+  margin-top: 40px;
+}
+
+.check-list { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+.check-list li {
+  position: relative;
+  padding-left: 30px;
+  color: var(--color-ink);
+}
+.check-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-steel);
+}
+.check-list li::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 9px;
+  width: 6px;
+  height: 3px;
+  border-left: 2px solid var(--color-foam);
+  border-bottom: 2px solid var(--color-foam);
+  transform: rotate(-45deg);
+}
+
+.timeline { position: relative; padding-left: 28px; }
+.timeline-line {
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--color-steel) 0 6px, transparent 6px 12px);
+}
+.timeline-item { position: relative; display: flex; gap: 18px; padding-bottom: 34px; }
+.timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-rust);
+  box-shadow: 0 0 0 5px rgba(178, 106, 67, 0.18);
+}
+.timeline-year {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--color-steel);
+}
+.timeline-content p { margin-top: 4px; color: var(--color-ink); }
+
+/* ---------- 8. УСЛУГИ ---------- */
+.cards-grid {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+}
+
+.service-card {
+  background: rgba(244, 246, 244, 0.04);
+  border: 1px solid rgba(244, 246, 244, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 30px 26px;
+  transition: transform 0.3s var(--ease), background-color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.service-card:hover {
+  transform: translateY(-6px);
+  background: rgba(244, 246, 244, 0.08);
+  border-color: var(--color-current);
+}
+.service-icon {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  color: var(--color-current);
+  margin-bottom: 18px;
+}
+.service-card h3 { color: var(--color-foam); margin-bottom: 10px; }
+.service-card p { color: var(--color-foam-dim); font-size: 0.96rem; margin: 0; }
+
+/* ---------- 8b. ПРОЕКТЫ ---------- */
+.section-lead {
+  max-width: 62ch;
+  color: var(--color-ink);
+  opacity: 0.85;
+  margin-top: -6px;
+}
+
+.projects-grid { margin-top: 40px; }
+
+.project-card {
+  background: #fff;
+  border: 1px solid var(--color-foam-dim);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  display: flex;
+  flex-direction: column;
+}
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-strong);
+}
+
+.project-photo {
+  aspect-ratio: 4 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--color-steel);
+  background:
+    repeating-linear-gradient(45deg, rgba(61, 107, 116, 0.08) 0 12px, rgba(61, 107, 116, 0.03) 12px 24px),
+    var(--color-foam-dim);
+  border-bottom: 1px dashed var(--color-rivet);
+}
+.project-photo svg { width: 40px; height: 40px; }
+.project-photo span {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-body { padding: 24px 26px 28px; }
+.project-meta {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-rust);
+  margin-bottom: 10px;
+}
+.project-body h3 { margin-bottom: 8px; }
+.project-body p { margin: 0; color: var(--color-ink); opacity: 0.85; font-size: 0.96rem; }
+
+/* ---------- 9. КОНТАКТЫ ---------- */
+.contacts-grid {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 40px;
+  align-items: stretch;
+}
+
+.contact-list { display: flex; flex-direction: column; gap: 22px; }
+.contact-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--color-foam-dim);
+}
+.contact-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+.contact-value { font-size: 1.05rem; }
+
+.map-embed {
+  position: relative;
+  min-height: 260px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-foam-dim);
+  box-shadow: var(--shadow-soft);
+  background: var(--color-foam-dim);
+}
+.map-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* лёгкая коррекция под минималистичную палитру сайта */
+  filter: grayscale(0.25) contrast(0.96);
+}
+
+/* ---------- 10. СВЯЗЬ С НАМИ (ФОРМА) ---------- */
+.feedback-inner {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 60px;
+  align-items: start;
+}
+.feedback-lead { color: var(--color-foam-dim); max-width: 40ch; }
+
+.feedback-form {
+  background: rgba(244, 246, 244, 0.04);
+  border: 1px solid rgba(244, 246, 244, 0.14);
+  border-radius: var(--radius-lg);
+  padding: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.form-row { display: flex; flex-direction: column; gap: 8px; }
+.form-row label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-rivet);
+}
+.form-row input,
+.form-row textarea {
+  background: rgba(17, 39, 48, 0.45);
+  border: 1px solid rgba(244, 246, 244, 0.18);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  color: var(--color-foam);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.25s var(--ease), background-color 0.25s var(--ease);
+}
+.form-row input::placeholder,
+.form-row textarea::placeholder { color: var(--color-rivet); }
+.form-row input:focus,
+.form-row textarea:focus {
+  border-color: var(--color-current);
+  background: rgba(17, 39, 48, 0.65);
+  outline: none;
+}
+
+.btn-wide { width: 100%; text-align: center; }
+.form-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-current);
+  min-height: 1.2em;
+}
+
+/* ---------- 11. ФУТЕР ---------- */
+.site-footer {
+  background: var(--color-abyss);
+  color: var(--color-foam-dim);
+  padding-top: 50px;
+  border-top: 2px solid rgba(143, 188, 194, 0.25);
+}
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 34px;
+  border-bottom: 1px solid rgba(244, 246, 244, 0.1);
+}
+.footer-brand { display: flex; align-items: center; gap: 14px; }
+.footer-brand .brand-mark { color: var(--color-current); width: 30px; height: 30px; }
+.footer-brand p { margin: 0; font-size: 0.9rem; line-height: 1.5; }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 22px; }
+.footer-nav a {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-foam-dim);
+  transition: color 0.25s var(--ease);
+}
+.footer-nav a:hover { color: var(--color-current); }
+.footer-copy {
+  font-size: 0.8rem;
+  padding-block: 22px;
+  color: var(--color-rivet);
+}
+
+/* ---------- 12. КНОПКИ + RIPPLE ---------- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 30px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background-color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.btn:active { transform: translateY(1px) scale(0.98); }
+
+.btn-primary {
+  background: var(--color-rust);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(178, 106, 67, 0.35);
+}
+.btn-primary:hover {
+  background: var(--color-rust-dark);
+  box-shadow: 0 12px 28px rgba(178, 106, 67, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-foam);
+  border-color: rgba(244, 246, 244, 0.4);
+}
+.btn-ghost:hover {
+  border-color: var(--color-current);
+  color: var(--color-current);
+  transform: translateY(-2px);
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(0);
+  animation: ripple-anim 0.6s var(--ease);
+  pointer-events: none;
+}
+@keyframes ripple-anim {
+  to { transform: scale(2.6); opacity: 0; }
+}
+
+/* ---------- 13. АНИМАЦИИ ПРИ СКРОЛЛЕ ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- 14. АДАПТИВ ---------- */
+@media (max-width: 980px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: left; }
+  .hero-badge { justify-content: flex-start; margin-top: 20px; }
+  .badge-svg { width: 190px; }
+  .about-grid,
+  .contacts-grid,
+  .feedback-inner { grid-template-columns: 1fr; }
+  .map-embed { min-height: 220px; }
+}
+
+/* Навигация сворачивается в бургер-меню раньше мобильной вёрстки:
+   6 пунктов верхнего уровня + длинное название завода не помещаются в один ряд до ~960px */
+@media (max-width: 960px) {
+  .main-nav {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: rgba(17, 39, 48, 0.97);
+    backdrop-filter: blur(8px);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s var(--ease);
+  }
+  .main-nav.is-open { max-height: 640px; }
+  .main-nav ul { flex-direction: column; align-items: stretch; padding: 12px 24px 24px; gap: 4px; }
+  .main-nav a { padding: 14px 10px; }
+  .nav-toggle { display: flex; }
+}
+
+@media (max-width: 760px) {
+  :root { --header-height: 72px; }
+  .section { padding-top: 80px; }
+  .section .container { padding-bottom: 70px; }
+  .hero-inner { padding-block: 40px 70px; }
+  .hero-actions .btn { flex: 1 1 auto; }
+}
+
+@media (max-width: 480px) {
+  .service-card { padding: 24px 20px; }
+  .feedback-form { padding: 24px; }
+}
+
+/* =========================================================
+   15. РАСШИРЕННАЯ АНИМАЦИЯ И ПОЛИРОВКА
+   Единый слой «оживления» сайта: прогресс прокрутки, активный
+   пункт меню, каскадные reveal-варианты, линии-акценты у
+   заголовков, статистика-счётчики, ховер-микровзаимодействия.
+   Всё уважает prefers-reduced-motion (см. глобальный сброс в п.2).
+   ========================================================= */
+
+/* --- Прогресс-бар прокрутки страницы --- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--color-steel), var(--color-current));
+  z-index: 200;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* --- Активный пункт меню (scrollspy) --- */
+.main-nav a.is-active { color: var(--color-current); }
+.main-nav a.is-active::after { transform: scaleX(1); opacity: 1; }
+.main-nav a.nav-cta.is-active { color: #fff; }
+
+/* --- Reveal-варианты с направлением и каскадом --- */
+.reveal-left  { opacity: 0; transform: translateX(-34px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal-right { opacity: 0; transform: translateX(34px);  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal-scale { opacity: 0; transform: scale(0.94);       transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal-left.is-visible,
+.reveal-right.is-visible,
+.reveal-scale.is-visible { opacity: 1; transform: none; }
+/* каскадная задержка внутри сеток задаётся из JS через --reveal-delay */
+.reveal,
+.reveal-left,
+.reveal-right,
+.reveal-scale { transition-delay: var(--reveal-delay, 0s); }
+
+/* --- Линия-акцент под заголовками секций (рисуется при появлении) --- */
+.section h2 {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 16px;
+}
+.section h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 60px;
+  border-radius: 2px;
+  background: var(--color-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s var(--ease) 0.15s;
+}
+.section h2.is-visible::after { transform: scaleX(1); }
+
+/* --- Блок статистики (в разделе «О нас») --- */
+.stats {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.stat {
+  text-align: center;
+  padding: 26px 16px;
+  background: #fff;
+  border: 1px solid var(--color-foam-dim);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.stat:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-strong);
+  border-color: var(--color-current);
+}
+.stat-num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+  line-height: 1;
+  color: var(--color-steel);
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-rivet);
+}
+
+/* --- Индикатор «листайте вниз» в герое --- */
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 128px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-foam-dim);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease) 1s, color 0.25s var(--ease);
+}
+body.page-ready .scroll-cue { opacity: 0.9; }
+.scroll-cue:hover { color: var(--color-current); }
+.scroll-cue-text {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.scroll-cue svg {
+  width: 22px;
+  height: 22px;
+  animation: cue-bounce 1.8s var(--ease) infinite;
+}
+@keyframes cue-bounce {
+  0%, 100% { transform: translateY(0);   opacity: 0.55; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+
+/* --- Ховер-полировка карточек услуг --- */
+.service-card { position: relative; overflow: hidden; }
+.service-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-current), var(--color-steel));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease);
+}
+.service-card:hover::before { transform: scaleX(1); }
+.service-icon svg { transition: transform 0.4s var(--ease); }
+.service-card:hover .service-icon svg { transform: translateY(-3px) rotate(-4deg); }
+
+/* --- Ховер-полировка карточек проектов --- */
+.project-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-rust);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease);
+  z-index: 1;
+}
+.project-card:hover::after { transform: scaleX(1); }
+.project-photo svg { transition: transform 0.5s var(--ease); }
+.project-card:hover .project-photo svg { transform: scale(1.12) rotate(2deg); }
+
+/* --- Блик по кнопке при наведении --- */
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.6s var(--ease);
+  pointer-events: none;
+}
+.btn:hover::before { left: 135%; }
+
+/* --- Отрисовка внешнего кольца бейджа при загрузке --- */
+.badge-ring-outer {
+  stroke-dasharray: 541;
+  stroke-dashoffset: 541;
+}
+body.page-ready .badge-ring-outer {
+  transition: stroke-dashoffset 1.6s var(--ease) 0.55s;
+  stroke-dashoffset: 0;
+}
+/* Медленное вращение кольца заклёпок — тонкая «жизнь» бейджа */
+.badge-rivets {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rivets-rotate 48s linear infinite;
+}
+@keyframes rivets-rotate { to { transform: rotate(360deg); } }
+
+/* --- Адаптив дополнений --- */
+@media (max-width: 980px) {
+  .scroll-cue { display: none; }
+}
+@media (max-width: 620px) {
+  .stats { grid-template-columns: 1fr; gap: 16px; }
+  .stat { padding: 22px 16px; }
+}
+
+/* Меньше движения — гасим бесконечные и «блуждающие» эффекты */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue svg,
+  .badge-rivets { animation: none !important; }
+  .badge-ring-outer { stroke-dashoffset: 0 !important; }
+  .reveal-left, .reveal-right, .reveal-scale { opacity: 1 !important; transform: none !important; }
+  .section h2::after { transform: scaleX(1) !important; }
+}
+
+/* =========================================================
+   16. ВНУТРЕННИЕ СТРАНИЦЫ НАПРАВЛЕНИЙ (Судостроение и т.п.)
+   Собраны на тех же токенах и компонентах, что и главная.
+   Новые блоки: шапка-герой страницы (.page-hero), этапы работ
+   (.process/.step-num), кликабельные карточки-ссылки.
+   ========================================================= */
+
+/* --- Герой внутренней страницы (тёмный, чтобы шапка-меню читалась) --- */
+.page-hero {
+  position: relative;
+  padding-top: var(--header-height);
+  background: linear-gradient(160deg, var(--color-abyss) 0%, var(--color-harbor) 65%, var(--color-steel) 135%);
+  color: var(--color-foam);
+  overflow: hidden;
+}
+.page-hero-glow {
+  position: absolute;
+  width: 820px;
+  height: 820px;
+  right: -260px;
+  top: -220px;
+  background: radial-gradient(circle, rgba(143, 188, 194, 0.14) 0%, rgba(143, 188, 194, 0) 70%);
+  animation: glow-drift 12s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.page-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  padding-block: 66px 96px;
+}
+.page-hero .eyebrow { color: var(--color-current); }
+.page-hero h1 { margin-bottom: 0.35em; }
+.page-hero-lead {
+  max-width: 60ch;
+  font-size: 1.12rem;
+  color: var(--color-foam-dim);
+}
+.page-hero-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 30px; }
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-rivet);
+}
+.breadcrumb a { color: var(--color-current); transition: color 0.25s var(--ease); }
+.breadcrumb a:hover { color: var(--color-foam); }
+.page-hero .wave-divider { position: absolute; left: 0; right: 0; bottom: -2px; height: 90px; }
+
+/* --- Этапы работ (нумерованные карточки на тёмной секции) --- */
+.process {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+.step-num {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--color-current);
+  margin-bottom: 14px;
+}
+
+/* --- Кликабельные карточки проектов (карточка целиком — ссылка) --- */
+a.project-card { cursor: pointer; }
+a.project-card:focus-visible { outline-offset: 4px; }
+.project-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+  transition: gap 0.25s var(--ease), color 0.25s var(--ease);
+}
+.project-more svg { width: 15px; height: 15px; }
+a.project-card:hover .project-more { gap: 12px; color: var(--color-rust); }
+
+@media (max-width: 760px) {
+  .page-hero-inner { padding-block: 44px 76px; }
+  .page-hero-actions .btn { flex: 1 1 auto; }
+}
